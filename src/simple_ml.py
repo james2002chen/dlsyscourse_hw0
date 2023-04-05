@@ -20,7 +20,7 @@ def add(x, y):
         Sum of x + y
     """
     ### BEGIN YOUR CODE
-    pass
+    return x + y
     ### END YOUR CODE
 
 
@@ -48,8 +48,20 @@ def parse_mnist(image_filename, label_filename):
                 for MNIST will contain the values 0-9.
     """
     ### BEGIN YOUR CODE
-    pass
-    ### END YOUR CODE
+    with gzip.open(image_filename, 'rb') as img_file, gzip.open(label_filename, 'rb') as lbl_file:
+        magic_num_images, num_images, num_rows, num_columns = np.frombuffer(img_file.read(16), dtype=np.dtype('>i4'))
+        magic_num_labels, num_labels = np.frombuffer(lbl_file.read(8), dtype=np.dtype('>i4'))
+
+        assert num_images == num_labels, 'Number of images and labels do not match'
+        assert magic_num_images == 2051, 'Invalid magic number in images file'
+        assert magic_num_labels == 2049, 'Invalid magic number in labels file'
+
+        image_data = np.frombuffer(img_file.read(), dtype=np.uint8).reshape(num_images, num_rows * num_columns)
+        label_data = np.frombuffer(lbl_file.read(), dtype=np.uint8)
+    return normalize(image_data), label_data
+
+def normalize(image_data):
+    return image_data.astype(np.float32) / 255.0
 
 
 def softmax_loss(Z, y):
